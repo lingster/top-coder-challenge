@@ -13,14 +13,11 @@ def calculate_reimbursement(days, miles, receipts):
         else:
             current_per_diem_rate = 65.0
     elif days >= 8: # Trips 8-10 days
-        # If it qualifies for High Effort Bonus (high miles, not excessively low daily receipts), use standard rate. Bonus adds on top.
         if miles > 800 and daily_receipts > 20:
-            current_per_diem_rate = 75.0 # Standard rate, bonus will make it effectively higher
-        # Penalized for high daily spend if not high effort (miles <=800)
+            current_per_diem_rate = 75.0
         elif miles <= 800 and daily_receipts > 90:
             current_per_diem_rate = 60.0
-        # Penalized for very low daily receipts if not high effort (miles <=800, or high miles but daily_receipts <=20)
-        elif daily_receipts < 20: # This will also catch (miles > 800 and daily_receipts <=20)
+        elif daily_receipts < 20:
              current_per_diem_rate = 60.0
         else: # Default for 8-10 days (e.g. moderate miles/receipts)
             current_per_diem_rate = 75.0
@@ -57,10 +54,22 @@ def calculate_reimbursement(days, miles, receipts):
 
     total_reimbursement = per_diem_total + mileage_reimbursement + receipt_reimbursement
 
+    # Kevin's Mileage Efficiency Bonus (Milder Version)
+    efficiency_bonus = 0.0
+    if days > 0:
+        miles_per_day = miles / days
+        if 185 <= miles_per_day <= 215:
+            efficiency_bonus = 30.0  # Sweet spot (trial increase from 25)
+        elif (160 <= miles_per_day < 185) or (215 < miles_per_day <= 240):
+            efficiency_bonus = 10.0  # Mildly outside (was 20)
+        # No penalty for mpd < 150 or > 250 in this version (was -25)
+
+    total_reimbursement += efficiency_bonus
+
     # High Effort Bonus (Simplified condition, similar to 23343 score model)
     if days > 6 and days < 11 and miles > 800:
         # Bonus should not apply if per diem already penalized for low spend on high effort trip
-        if not (days >= 8 and daily_receipts < 20 and miles > 800): # Avoid double penalizing/missing bonus
+        if not (days >= 8 and daily_receipts < 20 and miles > 800):
              total_reimbursement += 350.0
 
     # Ensure the final output is just the number
@@ -68,13 +77,12 @@ def calculate_reimbursement(days, miles, receipts):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        # This error message goes to stderr, so it won't interfere with stdout capture by eval.sh
         print(f"Usage: python {sys.argv[0]} <days> <miles> <receipts>", file=sys.stderr)
         sys.exit(1)
 
     try:
         days_arg = int(sys.argv[1])
-        miles_arg = float(sys.argv[2]) # Changed to float to handle fractional miles
+        miles_arg = float(sys.argv[2])
         receipts_arg = float(sys.argv[3])
     except ValueError:
         print("Error: Input arguments must be convertible to the correct types (int, float, float).", file=sys.stderr)
