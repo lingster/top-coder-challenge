@@ -46,10 +46,8 @@ def calculate_reimbursement(days, miles, receipts):
     receipt_reimbursement = 0.0
     # Reverted to the logic from the 20408-scoring model
     if receipts < 20.00 and days > 1:
-        receipt_reimbursement = -25.0
-    elif receipts <= 100: # New tier
-        receipt_reimbursement = receipts * 0.30
-    elif receipts <= 500: # This now covers $100.01 to $500
+        receipt_reimbursement = -10.0
+    elif receipts <= 500:
         receipt_reimbursement = receipts * 0.60
     elif receipts <= 1000:
         receipt_reimbursement = receipts * 0.50
@@ -64,7 +62,7 @@ def calculate_reimbursement(days, miles, receipts):
     if days > 6 and days < 11 and miles > 800:
         # Bonus should not apply if per diem already penalized for low spend on high effort trip
         if not (days >= 8 and daily_receipts < 20 and miles > 800): # Avoid double penalizing/missing bonus
-             total_reimbursement += 50.0
+             total_reimbursement += 350.0
 
     # MPD-Based Efficiency Bonuses
     if miles_per_day > 0 and miles_per_day < 100: # Bonus for 0-99 mpd

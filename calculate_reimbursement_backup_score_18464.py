@@ -64,7 +64,7 @@ def calculate_reimbursement(days, miles, receipts):
     if days > 6 and days < 11 and miles > 800:
         # Bonus should not apply if per diem already penalized for low spend on high effort trip
         if not (days >= 8 and daily_receipts < 20 and miles > 800): # Avoid double penalizing/missing bonus
-             total_reimbursement += 50.0
+             total_reimbursement += 350.0
 
     # MPD-Based Efficiency Bonuses
     if miles_per_day > 0 and miles_per_day < 100: # Bonus for 0-99 mpd
